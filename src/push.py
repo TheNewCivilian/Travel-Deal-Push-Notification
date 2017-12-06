@@ -16,7 +16,7 @@ def get_article():
     article_id = soup.find('article')['id']
     description = soup.find('article').find('a')['title']
     places = GeoText(description)
-    return {'idt':article_id,'text':description,'cities':places.cities,'price':find_Price_in_String(description)}
+    return {'idt':article_id,'text':description,'cities':places.cities,'price':find_Price_in_String(description),'type':find_type_in_String(description)}
 
 def find_Price_in_String(sinput):
     if u'$' or u'€' or u'£'in sinput:
@@ -27,6 +27,14 @@ def find_Price_in_String(sinput):
         return sinput[symbol_pos:symbol_pos+offset]
     else:
         return "No price :("
+
+def find_type_in_String(sinput):
+    if "roundtrip" in sinput:
+        return "roundtrip"
+    if "one-way" in sinput:
+        return "one-way"
+    else:
+        return ""
 
 def playsound():
     chunk = 1024
@@ -66,10 +74,9 @@ def describe_trip(cities):
 
 
 recent_article = 0
-#while(1):
-article = get_article()
-if (recent_article != article['idt']):
-    recent_article = article['idt']
-    sendmessage("For " + article['price'] + " " + describe_trip(article['cities']) , article['text'])
-    print "Check done!"
-    #time.sleep(120)
+while(1):
+    article = get_article()
+    if (recent_article != article['idt']):
+        recent_article = article['idt']
+        sendmessage("For " + article['price'] + " " + describe_trip(article['cities'])+ "  ("+article['type']+")", article['text'])
+        time.sleep(120)
