@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: latin-1 -*-
-import subprocess
+import subprocess, os
 from bs4 import BeautifulSoup
 from geotext import GeoText
 import requests
@@ -49,7 +49,7 @@ def playsound():
 
 def sendmessage(title,message):
     playsound()
-    subprocess.Popen(['notify-send','-a','DEAL!',title, message])
+    subprocess.Popen(['notify-send','-i',os.getcwd() + "/../res/airplane.svg",'-a','DEAL!',title, message])
     return
 
 def describe_trip(cities):
@@ -66,10 +66,10 @@ def describe_trip(cities):
 
 
 recent_article = 0
-while(1):
-    article = get_article()
-    if (recent_article != article['idt']):
-        recent_article = article['idt']
-        sendmessage("For " + article['price'] + " " + describe_trip(article['cities']) , article['text'])
-        print "Check done!"
-        time.sleep(120)
+#while(1):
+article = get_article()
+if (recent_article != article['idt']):
+    recent_article = article['idt']
+    sendmessage("For " + article['price'] + " " + describe_trip(article['cities']) , article['text'])
+    print "Check done!"
+    #time.sleep(120)
