@@ -10,6 +10,7 @@ import wave
 
 
 def get_article():
+    # Edit this line for other regions
     response = requests.get("http://www.secretflying.com/euro-deals/", timeout=5)
     html = response.text
     soup = BeautifulSoup(html,'html.parser')
@@ -40,18 +41,15 @@ def playsound():
     chunk = 1024
     wf = wave.open('../res/Beeper.wav', 'rb')
     p = pyaudio.PyAudio()
-
     stream = p.open(
         format = p.get_format_from_width(wf.getsampwidth()),
         channels = wf.getnchannels(),
         rate = wf.getframerate(),
         output = True)
     data = wf.readframes(chunk)
-
     while data != '':
         stream.write(data)
         data = wf.readframes(chunk)
-
     stream.close()
     p.terminate()
 
@@ -72,11 +70,11 @@ def describe_trip(cities):
                 trip.append(" "+item)
     return trip
 
-
+#Saves last article id
 recent_article = 0
 while(1):
     article = get_article()
     if (recent_article != article['idt']):
         recent_article = article['idt']
         sendmessage("For " + article['price'] + " " + describe_trip(article['cities'])+ "  ("+article['type']+")", article['text'])
-        time.sleep(120)
+        time.sleep(120) #Refresh delay
