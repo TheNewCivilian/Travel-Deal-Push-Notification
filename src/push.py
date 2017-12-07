@@ -39,7 +39,7 @@ def find_type_in_String(sinput):
 
 def playsound():
     chunk = 1024
-    wf = wave.open('../res/Beeper.wav', 'rb')
+    wf = wave.open(os.path.dirname(__file__)+'/../res/Beeper.wav', 'rb')
     p = pyaudio.PyAudio()
     stream = p.open(
         format = p.get_format_from_width(wf.getsampwidth()),
@@ -55,7 +55,8 @@ def playsound():
 
 def sendmessage(title,message):
     playsound()
-    subprocess.Popen(['notify-send','-i',os.getcwd() + "/../res/airplane.svg",'-a','DEAL!',title, message])
+    subprocess.Popen(['notify-send','-i',os.getcwd() +os.path.dirname(__file__)[1:]+ "/../res/airplane.svg",'-a','DEAL!',title, message])
+    print os.getcwd() +os.path.dirname(__file__)[1:]+"/../res/airplane.svg"
     return
 
 def describe_trip(cities):
@@ -77,4 +78,5 @@ while(1):
     if (recent_article != article['idt']):
         recent_article = article['idt']
         sendmessage("For " + article['price'] + " " + describe_trip(article['cities'])+ "  ("+article['type']+")", article['text'])
+        break
         time.sleep(120) #Refresh delay
