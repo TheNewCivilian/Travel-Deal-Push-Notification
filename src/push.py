@@ -10,14 +10,17 @@ import wave
 
 
 def get_article():
-    # Edit this line for other regions
-    response = requests.get("http://www.secretflying.com/euro-deals/", timeout=5)
-    html = response.text
-    soup = BeautifulSoup(html,'html.parser')
-    article_id = soup.find('article')['id']
-    description = soup.find('article').find('a')['title']
-    places = GeoText(description)
-    return {'idt':article_id,'text':description,'cities':places.cities,'price':find_Price_in_String(description),'type':find_type_in_String(description)}
+    try:
+        # Edit this line for other regions
+        response = requests.get("http://www.secretflying.com/euro-deals/", timeout=5)
+        html = response.text
+        soup = BeautifulSoup(html,'html.parser')
+        article_id = soup.find('article')['id']
+        description = soup.find('article').find('a')['title']
+        places = GeoText(description)
+        return {'idt':article_id,'text':description,'cities':places.cities,'price':find_Price_in_String(description),'type':find_type_in_String(description)}
+    except:
+        return {'idt':-1}
 
 def find_Price_in_String(sinput):
     if u'$' or u'€' or u'£'in sinput:
@@ -75,8 +78,12 @@ def describe_trip(cities):
 recent_article = 0
 while(1):
     article = get_article()
-    if (recent_article != article['idt']):
-        recent_article = article['idt']
-        sendmessage("For " + article['price'] + " " + describe_trip(article['cities'])+ "  ("+article['type']+")", article['text'])
-        break
-        time.sleep(120) #Refresh delay
+    if (article['idt'] == -1):
+        print "Error"
+        time.sleep(120)
+    else:
+        if (recent_article != article['idt']):
+            recent_article = article['idt']
+            sendmessage("For " + article['price'] + " " + describe_trip(article['cities'])+ "  ("+article['type']+")", article['text'])
+            #break #for debug
+            time.sleep(120) #Refresh delay
