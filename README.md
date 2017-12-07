@@ -1,4 +1,4 @@
-<h1> Travel deal push notification
+<h1> Travel-Deal-Push-Notification
 
 General:
 -------
