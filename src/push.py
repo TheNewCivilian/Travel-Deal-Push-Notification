@@ -64,7 +64,7 @@ def sendmessage(title,message):
 
 def describe_trip(cities):
     if len(cities) == 1:
-        trip = "in" + article['cities'][0]
+        trip = "from " + article['cities'][0]
     else:
         if len(cities) == 2:
             trip = "from " +cities[0] + " to "+ cities[1]
