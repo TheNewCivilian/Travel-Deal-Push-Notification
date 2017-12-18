@@ -4,12 +4,13 @@ import subprocess, os
 from bs4 import BeautifulSoup
 from geotext import GeoText
 import requests
-import time
+import sched, time
 import pyaudio
 import wave
 
 
 def get_article():
+    """Requests newest article from server"""
     try:
         # Edit this line for other regions
         response = requests.get("http://www.secretflying.com/euro-deals/", timeout=5)
@@ -23,6 +24,7 @@ def get_article():
         return {'idt':-1}
 
 def find_Price_in_String(sinput):
+    """Searches for Price signiture and returns price as string"""
     if u'$' or u'€' or u'£'in sinput:
         symbol_pos = max([unicode(sinput).find(u"\u0024"),unicode(sinput).find(u"\u20AC"),unicode(sinput).find(u"\u00A3")])
         offset = 1
@@ -33,6 +35,7 @@ def find_Price_in_String(sinput):
         return "No price :("
 
 def find_type_in_String(sinput):
+    """Returns trip type"""
     if "roundtrip" in sinput:
         return "roundtrip"
     if "one-way" in sinput:
@@ -41,6 +44,7 @@ def find_type_in_String(sinput):
         return ""
 
 def playsound():
+    """Plays notification sound"""
     chunk = 1024
     wf = wave.open(os.path.dirname(__file__)+'/../res/Beeper.wav', 'rb')
     p = pyaudio.PyAudio()
@@ -57,14 +61,16 @@ def playsound():
     p.terminate()
 
 def sendmessage(title,message):
+    """Sends notification to user"""
     playsound()
     subprocess.Popen(['notify-send','-i',os.getcwd() +os.path.dirname(__file__)[1:]+ "/../res/airplane.svg",'-a','DEAL!',title, message])
     print os.getcwd() +os.path.dirname(__file__)[1:]+"/../res/airplane.svg"
     return
 
 def describe_trip(cities):
+    """Prepares short notification Text"""
     if len(cities) == 1:
-        trip = "from " + article['cities'][0]
+        trip = "from " + cities[0]
     else:
         if len(cities) == 2:
             trip = "from " +cities[0] + " to "+ cities[1]
@@ -74,16 +80,24 @@ def describe_trip(cities):
                 trip.append(" "+item)
     return trip
 
-#Saves last article id
-recent_article = 0
-while(1):
+def check(inner_loop):
+    """Checks for new article"""
+    global recent_article
     article = get_article()
     if (article['idt'] == -1):
         print "Error"
-        time.sleep(120)
     else:
         if (recent_article != article['idt']):
             recent_article = article['idt']
             sendmessage("For " + article['price'] + " " + describe_trip(article['cities'])+ "  ("+article['type']+")", article['text'])
-            #break #for debug
-            time.sleep(120) #Refresh delay
+    loop.enter(120, 1, check, (inner_loop,))
+
+# Saves last article ID
+recent_article = 0
+
+# Creates schedular for executing the script every two minutes
+loop = sched.scheduler(time.time, time.sleep)
+
+# Start loop
+loop.enter(0, 1, check, (loop,))
+loop.run()
