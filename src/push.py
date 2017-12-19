@@ -9,19 +9,25 @@ import pyaudio
 import wave
 
 
-def get_article():
-    """Requests newest article from server"""
+def get_articles():
+    """Requests newest articles from server"""
     try:
         # Edit this line for other regions
         response = requests.get("http://www.secretflying.com/euro-deals/", timeout=5)
         html = response.text
         soup = BeautifulSoup(html,'html.parser')
-        article_id = soup.find('article')['id']
-        description = soup.find('article').find('a')['title']
-        places = GeoText(description)
-        return {'idt':article_id,'text':description,'cities':places.cities,'price':find_Price_in_String(description),'type':find_type_in_String(description)}
+        output = []
+        articles = soup.findAll('article')
+        # Interates over all articles
+        for item in articles:
+            if item.has_attr('id'):
+                article_id = item['id']
+                description = item.find('a')['title']
+                places = GeoText(description)
+                output.insert(0,{'idt':article_id,'text':description,'cities':places.cities,'price':find_Price_in_String(description),'type':find_type_in_String(description)})
+        return output
     except:
-        return {'idt':-1}
+        return []
 
 def find_Price_in_String(sinput):
     """Searches for Price signiture and returns price as string"""
@@ -81,19 +87,21 @@ def describe_trip(cities):
     return trip
 
 def check(inner_loop):
-    """Checks for new article"""
-    global recent_article
-    article = get_article()
-    if (article['idt'] == -1):
+    """Checks for new articles"""
+    global article_id_cout
+    articles = get_articles()
+    if (len(articles) == 0):
         print "Error"
     else:
-        if (recent_article != article['idt']):
-            recent_article = article['idt']
-            sendmessage("For " + article['price'] + " " + describe_trip(article['cities'])+ "  ("+article['type']+")", article['text'])
+        for item in articles:
+            article = item
+            if (article_id_cout < article['idt']):
+                article_id_cout = article['idt']
+                sendmessage("For " + article['price'] + " " + describe_trip(article['cities'])+ "  ("+article['type']+")", article['text'])
     loop.enter(120, 1, check, (inner_loop,))
 
 # Saves last article ID
-recent_article = 0
+article_id_cout = 0
 
 # Creates schedular for executing the script every two minutes
 loop = sched.scheduler(time.time, time.sleep)
