@@ -3,10 +3,12 @@
 import subprocess, os
 from bs4 import BeautifulSoup
 from geotext import GeoText
+import datetime
 import requests
 import sched, time
 import pyaudio
 import wave
+import re
 
 
 def get_articles():
@@ -21,10 +23,15 @@ def get_articles():
         # Interates over all articles
         for item in articles:
             if item.has_attr('id'):
-                article_id = item['id']
+                date_list = []
+                date = str(item.find('time')['datetime']).replace("-",",").replace("T",",").replace(":",",")
+                date = date[:len(date)-6]
+                date_list = date.split(",")
+                # 2017-12-19T19:22:03+00:00              Year          Month             Day                 Hour            Minute           Secound
+                article_time = datetime.datetime(int(date_list[0]),int(date_list[1]),int(date_list[2]),int(date_list[3]),int(date_list[4]),int(date_list[5]))
                 description = item.find('a')['title']
                 places = GeoText(description)
-                output.insert(0,{'idt':article_id,'text':description,'cities':places.cities,'price':find_Price_in_String(description),'type':find_type_in_String(description)})
+                output.insert(0,{'time':article_time,'text':description,'cities':places.cities,'price':find_Price_in_String(description),'type':find_type_in_String(description)})
         return output
     except:
         return []
@@ -70,7 +77,6 @@ def sendmessage(title,message):
     """Sends notification to user"""
     playsound()
     subprocess.Popen(['notify-send','-i',os.getcwd() +os.path.dirname(__file__)[1:]+ "/../res/airplane.svg",'-a','DEAL!',title, message])
-    print os.getcwd() +os.path.dirname(__file__)[1:]+"/../res/airplane.svg"
     return
 
 def describe_trip(cities):
@@ -95,13 +101,13 @@ def check(inner_loop):
     else:
         for item in articles:
             article = item
-            if (article_id_cout < article['idt']):
-                article_id_cout = article['idt']
+            if (article_id_cout < article['time']):
+                article_id_cout = article['time']
                 sendmessage("For " + article['price'] + " " + describe_trip(article['cities'])+ "  ("+article['type']+")", article['text'])
     loop.enter(120, 1, check, (inner_loop,))
 
 # Saves last article ID
-article_id_cout = 0
+article_id_cout = datetime.datetime(2017,01,01)
 
 # Creates schedular for executing the script every two minutes
 loop = sched.scheduler(time.time, time.sleep)
