@@ -89,7 +89,7 @@ def describe_trip(cities):
         else:
             trip = "between "
             for item in cities:
-                trip.append(" "+item)
+                trip += " " + item
     return trip
 
 def check(inner_loop):
