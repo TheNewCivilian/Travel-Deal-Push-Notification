@@ -4,6 +4,17 @@ General:
 -------
 This script wrapps the content of http://www.secretflying.com/ and sends desktop push notifications on gnome-desktop if a new deal comes out.
 
+Install:
+---------
+Just run the install script:
+
+```
+./install.py all
+```
+
+The files could be found in /usr/share/secretflyingpush afterwards.
+
+
 Configure:
 ---------
 To set your region edit the url in the get_article() function
