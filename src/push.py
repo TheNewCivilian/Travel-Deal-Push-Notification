@@ -59,7 +59,7 @@ def find_type_in_String(sinput):
 def playsound():
     """Plays notification sound"""
     chunk = 1024
-    wf = wave.open(os.path.dirname(__file__)+'/../res/Beeper.wav', 'rb')
+    wf = wave.open('../res/Beeper.wav', 'rb')
     p = pyaudio.PyAudio()
     stream = p.open(
         format = p.get_format_from_width(wf.getsampwidth()),
