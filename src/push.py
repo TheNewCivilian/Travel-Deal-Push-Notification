@@ -1,16 +1,15 @@
 #!/usr/bin/python
 # -*- coding: latin-1 -*-
-import subprocess, os
+import os
 from bs4 import BeautifulSoup
 from geotext import GeoText
-from gi.repository import Gtk
+from gi.repository import Gtk, GObject
 import notify2
 import datetime
 import requests
-import sched, time
+import time
 import pyaudio
 import wave
-import re
 import webbrowser
 
 class TDNotifiyer():
@@ -21,11 +20,8 @@ class TDNotifiyer():
         # Saves last article ID
         self.article_id_cout = datetime.datetime(2017,01,01)
 
-        # Creates schedular for executing the script every two minutes
-        self.loop = sched.scheduler(time.time, time.sleep)
-        # Start loop
-        self.loop.enter(0, 1, self.check, (self.loop,))
-        self.loop.run()
+        # Starts first check
+        self.check()
 
 
     def get_articles(self):
@@ -91,10 +87,10 @@ class TDNotifiyer():
         stream.close()
         p.terminate()
 
-    def openLink(self,n, action):
+    def openLink(self,n, action,link):
+        """Opens link on callback"""
         assert action == "default"
-        print 'test'
-        # webbrowser.open(link)
+        webbrowser.open(link)
         n.close()
 
     def sendmessage(self,article):
@@ -103,8 +99,8 @@ class TDNotifiyer():
         message = article['text']
         link = article['link']
         self.playsound()
-        n = notify2.Notification(title,message,"../res/airplane.svg")
-        n.add_action("default","Open", self.openLink)
+        n = notify2.Notification(title,message,os.path.join(os.path.abspath('.'),"../res/airplane.svg"))
+        n.add_action("default","Open", self.openLink,link)
         n.show()
         return
 
@@ -123,7 +119,7 @@ class TDNotifiyer():
                     trip += " " + item
         return trip
 
-    def check(self,inner_loop):
+    def check(self):
         """Checks for new articles"""
         # global article_id_cout
         articles = self.get_articles()
@@ -135,7 +131,9 @@ class TDNotifiyer():
                 if (self.article_id_cout < article['time']):
                     self.article_id_cout = article['time']
                     self.sendmessage(article)
-        self.loop.enter(120, 1, self.check, (inner_loop,))
+
+        # Creates schedular for executing the script every two minutes
+        GObject.timeout_add(120*1000, self.check)
 
 if __name__ == "__main__":
     TDNotifiyer()
