@@ -11,6 +11,7 @@ subprocess.call(["sudo","chmod","777","/usr/share/secretflyingpush/src"])
 if len(sys.argv) > 1:
     if sys.argv[1] == "all":
         subprocess.call(["pip","install","geotext"])
+        subprocess.call(["pip","install","notify2"])
         subprocess.call(["sudo","apt-get","install","python-pyaudio"])
 print "Install complete"
 print "You can now remove this directory"

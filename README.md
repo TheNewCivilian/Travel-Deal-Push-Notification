@@ -2,7 +2,7 @@
 
 General:
 -------
-This script wrapps the content of http://www.secretflying.com/ and sends desktop push notifications on gnome-desktop if a new deal comes out.
+This script wraps the content of http://www.secretflying.com/ and sends desktop push notifications on gnome-desktop if a new deal comes out.
 
 Install:
 ---------
@@ -37,6 +37,9 @@ GeoText:
 
 pyaudio
 - Ubuntu: <code class="shell">sudo apt-get install python-pyaudio</code>
+
+notify2
+- Ubuntu: <code class="shell">pip install notify2</code>
 
 
 
